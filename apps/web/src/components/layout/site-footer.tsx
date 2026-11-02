@@ -11,7 +11,8 @@ export async function SiteFooter() {
   const settings = await api<PublicSettings>("/settings/public").catch(() => null);
 
   return (
-    <footer className="bp-paper relative overflow-hidden border-t border-blueprint/15 bg-[#efe6d8] px-[max(20px,4vw)] pt-16">
+    // Снизу на телефоне — место под панель вкладок, чтобы она не закрывала конец подвала
+    <footer className="bp-paper relative overflow-hidden border-t border-blueprint/15 bg-[#efe6d8] px-[max(20px,4vw)] pt-12 pb-[calc(76px+env(safe-area-inset-bottom))] sm:pt-16 md:pb-0">
       <div className="mx-auto flex max-w-[1280px] flex-wrap justify-between gap-12">
         <div className="flex max-w-[340px] flex-col gap-[18px]">
           <Logo size={36} />

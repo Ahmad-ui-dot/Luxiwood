@@ -1,7 +1,7 @@
 "use client";
 
 import { type Model3dKey, type Paginated, type ProductListItem, type Room } from "@luxiwood/shared";
-import { Search, X } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -47,6 +47,7 @@ export function CatalogView({ products, filters }: Props) {
     };
   });
   const update = (patch: Partial<CatalogFilters>) => setState((current) => ({ ...current, ...patch }));
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Цвета у товара в списке нет — какие товары бывают в выбранном цвете, спрашиваем у API
   const [colorIds, setColorIds] = useState<number[] | null>(null);
@@ -126,16 +127,35 @@ export function CatalogView({ products, filters }: Props) {
               <b className="font-medium text-primary">◆</b>
               {t.catalog.deck} · {t.catalog.deckSub}
             </p>
-            <button
-              type="button"
-              onClick={resetAll}
-              className="h-9 cursor-pointer border border-blueprint/30 px-3.5 text-[13px] text-soft transition-colors hover:border-primary hover:text-primary"
-            >
-              ↺ {t.catalog.reset}
-              {chips.length > 0 && ` · ${chips.length}`}
-            </button>
+            <div className="flex gap-2">
+              {/* На телефоне панели подбора длинные — прячем их за кнопкой, чтобы товары были видны сразу */}
+              <button
+                type="button"
+                aria-expanded={filtersOpen}
+                aria-controls="filter-deck"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+                className={cn(
+                  "flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] transition-colors md:hidden",
+                  filtersOpen ? "border-primary bg-primary/12 text-foreground" : "border-blueprint/30 text-soft",
+                )}
+              >
+                <SlidersHorizontal aria-hidden="true" className="size-4 text-primary" />
+                {t.catalog.deck}
+                <ChevronDown aria-hidden="true" className={cn("size-4 transition-transform", filtersOpen && "rotate-180")} />
+              </button>
+              <button
+                type="button"
+                onClick={resetAll}
+                className="h-9 cursor-pointer border border-blueprint/30 px-3.5 text-[13px] text-soft transition-colors hover:border-primary hover:text-primary"
+              >
+                ↺ {t.catalog.reset}
+                {chips.length > 0 && ` · ${chips.length}`}
+              </button>
+            </div>
           </div>
-          <FilterDeck state={state} update={update} products={products} filters={filters} typeImages={thumbnails} />
+          <div id="filter-deck" className={cn(!filtersOpen && "max-md:hidden")}>
+            <FilterDeck state={state} update={update} products={products} filters={filters} typeImages={thumbnails} />
+          </div>
         </section>
 
         <section aria-label={t.catalog.title} className="flex flex-col gap-[22px] pt-[26px]">
@@ -170,7 +190,7 @@ export function CatalogView({ products, filters }: Props) {
               </form>
               <div role="group" aria-label={t.catalog.sortLabel} className="flex flex-wrap items-center gap-3">
               <span className="text-[13px] font-medium text-blueprint">{t.catalog.sortLabel}</span>
-              <span className="flex flex-wrap border border-blueprint/30">
+              <span className="grid w-full grid-cols-4 border border-blueprint/30 sm:flex sm:w-auto sm:flex-wrap">
                 {t.catalog.sorts.map((sort) => (
                   <button
                     key={sort.value}
@@ -178,7 +198,7 @@ export function CatalogView({ products, filters }: Props) {
                     aria-pressed={state.sort === sort.value}
                     onClick={() => update({ sort: sort.value as Sort })}
                     className={cn(
-                      "h-9 cursor-pointer px-3.5 text-[13px] whitespace-nowrap transition-colors",
+                      "h-9 cursor-pointer px-1 text-xs whitespace-nowrap transition-colors sm:px-3.5 sm:text-[13px]",
                       state.sort === sort.value ? "bg-primary text-primary-foreground" : "text-soft hover:text-foreground",
                     )}
                   >

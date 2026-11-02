@@ -79,6 +79,14 @@
   }
 }
 
+/* Горизонтальная лента со свайпом на телефоне — без полосы прокрутки */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Мягкое тёплое свечение вместо сетки */
 @utility bg-grid {
   background-image: radial-gradient(800px 500px at 80% 0%, rgb(192 97 47 / 0.08), transparent 70%);

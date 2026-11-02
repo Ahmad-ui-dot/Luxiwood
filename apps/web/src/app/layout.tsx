@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Onest, Playfair_Display } from "next/font/google";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,6 +18,12 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t.home.heroSub,
   };
 }
+
+// На телефоне: панель браузера в цвет фона, страница заходит под «чёлку» — отступы даёт env(safe-area-inset-*)
+export const viewport: Viewport = {
+  themeColor: "#f6f0e6",
+  viewportFit: "cover",
+};
 
 // Язык читаем из cookie. С cacheComponents это можно делать только внутри <Suspense>
 async function LangRoot({ children }: { children: React.ReactNode }) {

@@ -26,13 +26,13 @@ export function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5">
-      <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border bg-[rgb(255_250_243/0.85)] px-3 py-2 shadow-[0_10px_30px_-14px_rgb(90_60_30/0.3)] backdrop-blur-[14px] sm:px-5">
+    <header className="sticky top-0 z-40 px-3 pt-[max(env(safe-area-inset-top),0.75rem)] sm:px-5">
+      <div className="mx-auto flex max-w-[1360px] items-center gap-x-4 rounded-2xl border border-border bg-[rgb(255_250_243/0.85)] px-3 py-2 shadow-[0_10px_30px_-14px_rgb(90_60_30/0.3)] backdrop-blur-[14px] sm:px-5">
         <Link href="/" aria-label={`${t.brand} — ${t.nav.home}`} className="flex items-center py-1">
-          <Logo size={30} />
+          <Logo size={28} />
         </Link>
 
-        <nav aria-label={t.nav.home} className="order-last flex w-full justify-center gap-1 md:order-none md:w-auto md:flex-1">
+        <nav aria-label={t.nav.home} className="hidden flex-1 justify-center gap-1 md:flex">
           {links.map((link) => {
             const active = pathname === link.href;
             return (
@@ -53,10 +53,11 @@ export function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-1 md:ml-0">
           <LanguageSwitch className="mr-1" />
-          <Link href="/wishlist" aria-label={t.nav.wishlist} title={t.nav.wishlist} className={iconButton}>
+          {/* На телефоне избранное и корзина живут в нижней панели вкладок */}
+          <Link href="/wishlist" aria-label={t.nav.wishlist} title={t.nav.wishlist} className={cn(iconButton, "max-md:hidden")}>
             <Heart className="size-[19px]" strokeWidth={1.6} />
           </Link>
-          <Link href="/cart" aria-label={`${t.nav.cart}: ${cart.count}`} title={t.nav.cart} className={iconButton}>
+          <Link href="/cart" aria-label={`${t.nav.cart}: ${cart.count}`} title={t.nav.cart} className={cn(iconButton, "max-md:hidden")}>
             <ShoppingBag className="size-[19px]" strokeWidth={1.6} />
             {cart.ready && cart.count > 0 && (
               <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground ring-2 ring-card">
@@ -84,7 +85,7 @@ export function SiteHeader() {
             <Link
               href="/account"
               aria-label={`${t.nav.account}: ${user.name}`}
-              className="ml-1 flex h-10 items-center gap-2 rounded-full border border-border bg-card pr-4 pl-1 text-sm transition-colors hover:border-primary/50 hover:text-primary"
+              className="ml-1 flex h-10 items-center gap-2 rounded-full border border-border bg-card p-1 text-sm sm:pr-4 transition-colors hover:border-primary/50 hover:text-primary"
             >
               <span className="flex size-8 items-center justify-center rounded-full bg-primary text-[13px] font-semibold text-primary-foreground">
                 {user.name.charAt(0).toUpperCase()}

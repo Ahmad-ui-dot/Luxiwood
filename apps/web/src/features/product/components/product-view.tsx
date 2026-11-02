@@ -5,7 +5,7 @@ import { Minus, Plus, RotateCcw, RotateCw, Ruler } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ViewControls } from "@/features/viewer3d/product-scene";
 import { MAX_CART_ITEMS, useCart } from "@/lib/cart";
@@ -133,6 +133,16 @@ export function ProductView({ product }: { product: ProductDetails }) {
   const stars = Math.round(product.ratingAvg);
   const isWished = wished.includes(product.id);
   const canConfigure = (CONFIGURATOR_KEYS as readonly string[]).includes(product.model3dKey);
+
+  // Нижняя панель «В корзину» на телефоне прячется, когда видны основные кнопки
+  const buyRef = useRef<HTMLDivElement>(null);
+  const [buyVisible, setBuyVisible] = useState(true);
+  useEffect(() => {
+    if (!buyRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => setBuyVisible(entry.isIntersecting));
+    observer.observe(buyRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="px-[max(20px,4vw)] pt-7 pb-[110px]">
@@ -336,7 +346,7 @@ export function ProductView({ product }: { product: ProductDetails }) {
               )}
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div ref={buyRef} className="flex flex-col gap-3">
               <button
                 type="button"
                 onClick={() => addToCart(false)}
@@ -376,6 +386,24 @@ export function ProductView({ product }: { product: ProductDetails }) {
         </div>
 
         <ReviewsSection productId={product.id} />
+      </div>
+
+      {/* Телефон: цена и «В корзину» под рукой, над панелью вкладок */}
+      <div
+        inert={buyVisible}
+        className={cn(
+          "fixed inset-x-3 bottom-[calc(max(env(safe-area-inset-bottom),12px)+72px)] z-30 mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-border bg-[rgb(255_250_243/0.92)] p-2 pl-4 shadow-[0_-6px_30px_-14px_rgb(90_60_30/0.35)] backdrop-blur-[14px] transition-[opacity,translate] duration-200 md:hidden",
+          buyVisible && "pointer-events-none translate-y-3 opacity-0",
+        )}
+      >
+        <p className="min-w-0 flex-1 truncate font-heading text-xl tracking-[-0.02em]">{t.price(price)}</p>
+        <button
+          type="button"
+          onClick={() => addToCart(false)}
+          className="lx-gold h-11 shrink-0 cursor-pointer bg-primary px-5 text-sm font-bold text-primary-foreground"
+        >
+          {t.product.toCart}
+        </button>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ export function Hero() {
 
   return (
     <section aria-label={t.brand} className="bp-paper relative overflow-hidden">
-      <div className="relative mx-auto flex max-w-[1360px] flex-wrap items-center gap-12 px-[max(20px,4vw)] pt-[72px] pb-16">
+      <div className="relative mx-auto flex max-w-[1360px] flex-wrap items-center gap-10 px-[max(20px,4vw)] pt-10 pb-12 sm:gap-12 sm:pt-[72px] sm:pb-16">
         <div className="flex min-w-0 flex-[1_1_420px] flex-col gap-[26px]">
           <p className="flex items-center gap-3 text-sm font-medium text-blueprint">
             <span className="h-px w-10 bg-primary" />
@@ -63,7 +63,7 @@ export function Hero() {
         </div>
 
         <div className="min-w-0 flex-[1.25_1_560px]">
-          <div className="bp-frame relative h-[clamp(440px,46vw,600px)] overflow-hidden border border-blueprint/20 bg-[radial-gradient(ellipse_60%_55%_at_50%_58%,rgb(192_97_47/0.18),transparent_70%),rgb(255_250_243/0.65)]">
+          <div className="bp-frame relative h-[clamp(380px,46vw,600px)] overflow-hidden border border-blueprint/20 bg-[radial-gradient(ellipse_60%_55%_at_50%_58%,rgb(192_97_47/0.18),transparent_70%),rgb(255_250_243/0.65)]">
             <span className="absolute top-4 left-4 z-[3] flex items-center gap-2 rounded-full bg-[rgb(255_250_243/0.9)] px-3.5 py-1.5 text-[13px] text-soft">
               <span className="size-2 animate-pulse rounded-full bg-primary" />
               {t.home.hLive}
