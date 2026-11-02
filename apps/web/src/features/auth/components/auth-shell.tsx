@@ -1,3 +1,4 @@
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getT } from "@/lib/i18n-server";
 
@@ -22,7 +23,7 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
       <main className="flex min-h-[760px] min-w-0 flex-1 flex-wrap items-stretch">
         <section
           aria-label={t.brand}
-          className="relative flex min-w-0 flex-[1_1_480px] flex-col justify-center gap-9 overflow-hidden bg-[radial-gradient(ellipse_70%_60%_at_30%_40%,rgb(192_97_47/0.2)_0%,rgb(192_97_47/0.04)_55%,transparent_80%)] px-[max(24px,5vw)] py-[72px]"
+          className="relative flex min-w-0 flex-[1_1_480px] flex-col justify-center gap-9 overflow-hidden bg-[radial-gradient(ellipse_70%_60%_at_30%_40%,rgb(192_97_47/0.2)_0%,rgb(192_97_47/0.04)_55%,transparent_80%)] px-[max(24px,5vw)] py-[72px] max-md:pb-[calc(96px+env(safe-area-inset-bottom))]"
         >
           <p
             aria-hidden="true"
@@ -56,10 +57,13 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
           </ul>
         </section>
 
-        <section className="flex min-w-0 flex-[1_1_440px] items-center justify-center border-l border-[rgb(90_62_40/0.08)] bg-[#f1e9dd] px-[max(20px,4vw)] py-14">
+        {/* На телефоне форма идёт первой — ради неё сюда и пришли */}
+        <section className="flex min-w-0 flex-[1_1_440px] items-center justify-center border-l max-lg:order-first border-[rgb(90_62_40/0.08)] bg-[#f1e9dd] px-[max(20px,4vw)] py-14">
           {children}
         </section>
       </main>
+      {/* На телефоне меню шапки спрятано — переходы по сайту через нижнюю панель */}
+      <MobileTabBar />
     </>
   );
 }
