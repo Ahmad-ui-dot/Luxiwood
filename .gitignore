@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+
+# Загруженные файлы не храним в git, оставляем только пустые папки
+apps/api/uploads/**/*
+!apps/api/uploads/images/
+!apps/api/uploads/models/
+!apps/api/uploads/**/.gitkeep

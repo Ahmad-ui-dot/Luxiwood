@@ -1,0 +1,307 @@
+// Модели данных Luxiwood. Деньги — целые сомони (Int), без дирамов.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+// FABRIC — ткань обивки (букле, велюр…), COLOR — цвет обивки,
+// WOOD — порода дерева, FINISH — покрытие дерева (масло-воск, лак…)
+enum MaterialType {
+  FABRIC
+  COLOR
+  WOOD
+  FINISH
+}
+
+enum ProductKind {
+  FABRIC
+  WOOD
+}
+
+// Роль материала у товара: MAIN — основной (ткань или дерево по kind), COLOR — цвет обивки, WOOD — дерево ножек и каркаса
+enum MaterialRole {
+  MAIN
+  COLOR
+  WOOD
+}
+
+enum Model3dKey {
+  sofa
+  armchair
+  bed
+  wardrobe
+  table
+  chair
+  dresser
+  nightstand
+  shelf
+  pouf
+  bench
+}
+
+enum Room {
+  LIVING
+  BEDROOM
+  DINING
+  OFFICE
+  KIDS
+  HALLWAY
+}
+
+enum Badge {
+  NONE
+  HIT
+  NEW
+}
+
+// Этапы заказа, как на сайте: Принят, Каркас, Сборка, Обивка, В пути, Доставлен, Отменён
+enum OrderStatus {
+  NEW
+  FRAME
+  ASSEMBLY
+  UPHOLSTERY
+  DELIVERING
+  DONE
+  CANCELLED
+}
+
+enum Payment {
+  CASH
+  CARD
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  email             String?   @unique
+  phone             String?   @unique // без пробелов: +992930000001
+  name              String    @unique // логин для входа (вместе с email)
+  passwordHash      String
+  // Когда пароль меняли в последний раз: токены, выданные раньше, больше не действуют
+  passwordChangedAt DateTime?
+  role              Role      @default(CLIENT)
+  defaultAddress    String?
+  createdAt         DateTime  @default(now())
+
+  orders         Order[]
+  statusChanges  OrderStatusHistory[]
+  wishlist       WishlistItem[]
+  reviews        Review[]
+  passwordResets PasswordReset[]
+}
+
+// Код для восстановления пароля, отправленный на email. Хранится только хеш кода
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  codeHash  String
+  attempts  Int      @default(0) // неудачные попытки ввода; после 5 код перестаёт действовать
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  slug      String    @unique
+  name      String
+  sortOrder Int       @default(0)
+  products  Product[]
+}
+
+model Material {
+  id         Int          @id @default(autoincrement())
+  type       MaterialType
+  name       String
+  hex        String
+  priceDelta Int          @default(0)
+  isActive   Boolean      @default(true)
+
+  products         ProductMaterial[]
+  mainOrderItems   OrderItem[]       @relation("OrderItemMainMaterial")
+  colorOrderItems  OrderItem[]       @relation("OrderItemColorMaterial")
+  woodOrderItems   OrderItem[]       @relation("OrderItemWoodMaterial")
+  finishOrderItems OrderItem[]       @relation("OrderItemFinishMaterial")
+
+  @@index([type])
+}
+
+model Product {
+  id             Int         @id @default(autoincrement())
+  slug           String      @unique
+  sku            String      @unique
+  name           String
+  description    String      @default("")
+  categoryId     Int
+  basePrice      Int
+  oldPrice       Int? // цена до скидки; null — скидки нет
+  kind           ProductKind
+  room           Room        @default(LIVING)
+  badge          Badge       @default(NONE)
+  widthCm        Int // ширина размера по умолчанию — для фильтра «встанет в нишу»
+  materialsText  String      @default("")
+  productionDays Int // срок изготовления, дней
+  model3dKey     Model3dKey
+  modelUrl       String?
+  images         String[]    @default([])
+  ratingAvg      Float       @default(0)
+  reviewsCount   Int         @default(0)
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  category   Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  materials  ProductMaterial[]
+  sizes      ProductSize[]
+  orderItems OrderItem[]
+  wishlist   WishlistItem[]
+  reviews    Review[]
+
+  @@index([categoryId])
+  @@index([basePrice])
+}
+
+// Какие материалы разрешены для товара
+model ProductMaterial {
+  productId  Int
+  materialId Int
+  role       MaterialRole
+  isDefault  Boolean      @default(false)
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@id([productId, materialId, role])
+}
+
+model ProductSize {
+  id         Int     @id @default(autoincrement())
+  productId  Int
+  label      String
+  widthCm    Int
+  heightCm   Int
+  depthCm    Int
+  priceDelta Int     @default(0)
+  isDefault  Boolean @default(false)
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  number        String      @unique // LX-2026-0001
+  userId        Int? // null — заказ гостя
+  customerName  String
+  phone         String // без пробелов: +992930000001
+  address       String
+  comment       String?
+  deliveryDate  DateTime?   @db.Date
+  payment       Payment     @default(CASH)
+  status        OrderStatus @default(NEW)
+  subtotal      Int
+  deliveryPrice Int
+  total         Int
+  adminNote     String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user    User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items   OrderItem[]
+  history OrderStatusHistory[]
+
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id               Int        @id @default(autoincrement())
+  orderId          Int
+  productId        Int? // null — мебель из конструктора
+  title            String
+  model3dKey       Model3dKey
+  mainMaterialId   Int? // ткань обивки или основное дерево
+  colorMaterialId  Int?
+  woodMaterialId   Int?
+  finishMaterialId Int?
+  sizeId           Int?
+  customWidthCm    Int?
+  customDepthCm    Int?
+  customHeightCm   Int?
+  options          String[]   @default([])
+  quantity         Int
+  unitPrice        Int
+  snapshot         Json // всё, что выбрал покупатель, и расчёт цены на момент заказа
+
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  mainMaterial   Material?    @relation("OrderItemMainMaterial", fields: [mainMaterialId], references: [id], onDelete: Restrict)
+  colorMaterial  Material?    @relation("OrderItemColorMaterial", fields: [colorMaterialId], references: [id], onDelete: Restrict)
+  woodMaterial   Material?    @relation("OrderItemWoodMaterial", fields: [woodMaterialId], references: [id], onDelete: Restrict)
+  finishMaterial Material?    @relation("OrderItemFinishMaterial", fields: [finishMaterialId], references: [id], onDelete: Restrict)
+  size           ProductSize? @relation(fields: [sizeId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id        Int         @id @default(autoincrement())
+  orderId   Int
+  status    OrderStatus
+  changedAt DateTime    @default(now())
+  changedBy Int? // кто сменил: администратор или клиент (отмена); null — гость при оформлении
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [changedBy], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+model WishlistItem {
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  userId     Int
+  rating     Int // 1–5
+  text       String
+  isApproved Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+}
+
+// Настройки магазина: доставка, контакты, цены конструктора. Значение — JSON
+model Setting {
+  key   String @id
+  value Json
+}

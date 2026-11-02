@@ -1,0 +1,19 @@
+{
+  "name": "luxiwood",
+  "private": true,
+  "packageManager": "pnpm@10.34.7",
+  "scripts": {
+    "dev": "node scripts/ensure-env.mjs && docker compose up -d --wait && pnpm build:shared && pnpm --filter @luxiwood/api db:deploy && pnpm db:seed && concurrently -k -n api,web -c yellow,cyan \"pnpm --filter @luxiwood/api start:dev\" \"pnpm --filter @luxiwood/web dev\"",
+    "build:shared": "pnpm --filter @luxiwood/shared build",
+    "dev:api": "pnpm build:shared && pnpm --filter @luxiwood/api start:dev",
+    "build": "pnpm -r build",
+    "test": "pnpm build:shared && pnpm -r test",
+    "lint": "pnpm -r lint",
+    "db:migrate": "pnpm --filter @luxiwood/api db:migrate",
+    "db:seed": "pnpm --filter @luxiwood/api db:seed",
+    "dev:web": "pnpm build:shared && pnpm --filter @luxiwood/web dev"
+  },
+  "devDependencies": {
+    "concurrently": "9.2.1"
+  }
+}

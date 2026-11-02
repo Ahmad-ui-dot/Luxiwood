@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: luxiwood-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: luxiwood
+      POSTGRES_PASSWORD: luxiwood
+      POSTGRES_DB: luxiwood
+    ports:
+      - "5440:5432" # 5440, потому что 5432–5434 заняты другими базами на этом компьютере
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
