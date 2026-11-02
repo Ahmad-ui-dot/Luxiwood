@@ -1,6 +1,7 @@
 "use client";
 
 import { type Model3dKey, type Paginated, type ProductListItem, type Room } from "@luxiwood/shared";
+import { Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -117,31 +118,6 @@ export function CatalogView({ products, filters }: Props) {
             </h1>
             <p className="max-w-[520px] text-base leading-[1.6] font-light text-soft">{t.catalog.sub}</p>
           </div>
-
-          <form role="search" onSubmit={(event) => event.preventDefault()} className="min-w-[260px] flex-[0_1_460px]">
-            <label htmlFor="catalog-search" className="mb-2.5 block text-[13px] font-medium text-blueprint">
-              {t.catalog.findLabel}
-            </label>
-            <div className="flex h-[58px] items-center gap-3 border border-blueprint/35 bg-[rgb(255_250_243/0.8)] px-[18px] transition-colors focus-within:border-primary">
-              <span aria-hidden="true" className="text-[15px] text-primary">
-                ›
-              </span>
-              <input
-                id="catalog-search"
-                type="search"
-                autoComplete="off"
-                value={state.q}
-                onChange={(event) => update({ q: event.target.value })}
-                placeholder={t.catalog.searchPlaceholder}
-                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-dim"
-              />
-              {state.q && (
-                <button type="button" onClick={() => update({ q: "" })} aria-label={t.catalog.clearSearch} className="cursor-pointer text-lg text-muted-foreground hover:text-foreground">
-                  ×
-                </button>
-              )}
-            </div>
-          </form>
         </section>
 
         <section aria-label={t.catalog.deck} className="flex flex-col gap-3.5 pt-7 pb-2">
@@ -168,7 +144,31 @@ export function CatalogView({ products, filters }: Props) {
               <span className="font-heading text-[34px] tracking-[-0.03em]">{found.length}</span>
               <span className="text-xs text-muted-foreground">{t.common.modelsWord(found.length)}</span>
             </p>
-            <div role="group" aria-label={t.catalog.sortLabel} className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Поиск рядом с сортировкой — той же высоты, что и кнопки */}
+              <form role="search" onSubmit={(event) => event.preventDefault()} className="w-full sm:w-64">
+                <label htmlFor="catalog-search" className="sr-only">
+                  {t.catalog.findLabel}
+                </label>
+                <div className="flex h-9 items-center gap-2 border border-blueprint/30 bg-[rgb(255_250_243/0.8)] px-3 transition-colors focus-within:border-primary">
+                  <Search aria-hidden="true" className="size-4 shrink-0 text-primary" />
+                  <input
+                    id="catalog-search"
+                    type="text"
+                    autoComplete="off"
+                    value={state.q}
+                    onChange={(event) => update({ q: event.target.value })}
+                    placeholder={t.catalog.searchPlaceholder}
+                    className="h-full min-w-0 flex-1 border-0 bg-transparent text-[13px] text-foreground outline-none placeholder:text-dim"
+                  />
+                  {state.q && (
+                    <button type="button" onClick={() => update({ q: "" })} aria-label={t.catalog.clearSearch} className="cursor-pointer text-muted-foreground hover:text-foreground">
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+              </form>
+              <div role="group" aria-label={t.catalog.sortLabel} className="flex flex-wrap items-center gap-3">
               <span className="text-[13px] font-medium text-blueprint">{t.catalog.sortLabel}</span>
               <span className="flex flex-wrap border border-blueprint/30">
                 {t.catalog.sorts.map((sort) => (
@@ -186,6 +186,7 @@ export function CatalogView({ products, filters }: Props) {
                   </button>
                 ))}
               </span>
+              </div>
             </div>
           </div>
 
