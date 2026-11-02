@@ -9,7 +9,8 @@ import { UPLOADS_DIR } from './uploads/uploads.controller';
 export function setupApp(app: NestExpressApplication) {
   // Префикс задаётся до Swagger, чтобы пути в документации совпадали с реальными
   app.setGlobalPrefix('api');
-  app.enableCors({ origin: process.env.CORS_ORIGIN });
+  // Можно несколько адресов через запятую: "http://localhost:3000,https://luxiwood.vercel.app"
+  app.enableCors({ origin: process.env.CORS_ORIGIN?.split(',').map((origin) => origin.trim()) });
   app.useGlobalPipes(createValidationPipe());
   app.useGlobalFilters(new AllExceptionsFilter());
   // Загруженные фото и 3D-модели: /uploads/images/..., /uploads/models/...
