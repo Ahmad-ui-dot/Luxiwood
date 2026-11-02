@@ -1,0 +1,9 @@
+# Netlify: сайт (Next.js). Адрес API задаётся в настройках сайта: NEXT_PUBLIC_API_URL
+[build]
+  # Сначала собираем общий пакет @luxiwood/shared, без него сайт не соберётся
+  command = "pnpm --filter @luxiwood/shared build && pnpm --filter @luxiwood/web build"
+  # Путь считается от корня репозитория, а не от apps/web
+  publish = "apps/web/.next"
+
+[build.environment]
+  NODE_VERSION = "22"

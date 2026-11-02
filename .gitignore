@@ -9,3 +9,6 @@ apps/api/uploads/**/*
 !apps/api/uploads/images/
 !apps/api/uploads/models/
 !apps/api/uploads/**/.gitkeep
+
+# Local Netlify folder
+.netlify
